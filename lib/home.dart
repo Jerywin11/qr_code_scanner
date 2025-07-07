@@ -418,31 +418,34 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 
   void _onQRViewCreated(QRViewController controller) {
-    setState(() {
-      this.controller = controller;
-    });
-    
-    controller.scannedDataStream.listen((scanData) {
+  setState(() {
+    this.controller = controller;
+  });
+
+  controller.scannedDataStream.listen((scanData) async {
+    if (result == null) {
       setState(() {
         result = scanData;
       });
-      
-      // Auto-navigate when a code is scanned
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          Navigator.of(context).pushReplacement(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  ResultScreen(result: scanData),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                return FadeTransition(opacity: animation, child: child);
-              },
-            ),
-          );
-        }
-      });
-    });
-  }
+
+      // ✅ Pause camera before navigation
+      await controller.pauseCamera();
+
+      // ✅ Navigate to result page safely
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                ResultScreen(result: scanData),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
+        );
+      }
+    }
+  });
+}
 
   void _onPermissionSet(
       BuildContext context, QRViewController ctrl, bool permission) {

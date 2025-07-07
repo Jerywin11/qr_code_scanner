@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:qr_code_scanner/home.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -12,7 +13,8 @@ class ResultScreen extends StatefulWidget {
   State<ResultScreen> createState() => _ResultScreenState();
 }
 
-class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMixin {
+class _ResultScreenState extends State<ResultScreen>
+    with TickerProviderStateMixin {
   late AnimationController _slideController;
   late AnimationController _fadeController;
   late Animation<Offset> _slideAnimation;
@@ -29,23 +31,17 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOut,
-    ));
-    
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+
     _slideController.forward();
     _fadeController.forward();
   }
@@ -66,11 +62,7 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0A0E21),
-              Color(0xFF1E1E2E),
-              Color(0xFF2A2A3A),
-            ],
+            colors: [Color(0xFF0A0E21), Color(0xFF1E1E2E), Color(0xFF2A2A3A)],
           ),
         ),
         child: SafeArea(
@@ -78,7 +70,7 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
             children: [
               // Header
               _buildHeader(),
-              
+
               // Content
               Expanded(
                 child: SlideTransition(
@@ -178,11 +170,7 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
             ),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            _getIconForType(),
-            color: Colors.white,
-            size: 24,
-          ),
+          child: Icon(_getIconForType(), color: Colors.white, size: 24),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -223,7 +211,7 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
     final bool isUrl = uri != null && uri.hasScheme;
 
     if (isUrl) {
-      return _buildUrlResult(uri!);
+      return _buildUrlResult(uri);
     }
 
     // Check for other types
@@ -320,10 +308,7 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
               fontWeight: FontWeight.w400,
             ),
           ),
-          if (details != null) ...[
-            const SizedBox(height: 12),
-            ...details,
-          ],
+          if (details != null) ...[const SizedBox(height: 12), ...details],
         ],
       ),
     );
@@ -334,38 +319,50 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
     if (code == null) return const SizedBox.shrink();
 
     List<Widget> buttons = [];
-    
+
     // Always add copy button
-    buttons.add(_buildActionButton(
-      icon: Icons.copy,
-      label: 'Copy',
-      onTap: () => _copyToClipboard(code),
-      isPrimary: false,
-    ));
+    buttons.add(
+      _buildActionButton(
+        icon: Icons.copy,
+        label: 'Copy',
+        onTap: () => _copyToClipboard(code),
+        isPrimary: false,
+      ),
+    );
 
     // Add specific action buttons based on content type
     final Uri? uri = Uri.tryParse(code);
     if (uri != null && uri.hasScheme) {
-      buttons.insert(0, _buildActionButton(
-        icon: Icons.open_in_new,
-        label: 'Open',
-        onTap: () => _launchUrl(uri),
-        isPrimary: true,
-      ));
+      buttons.insert(
+        0,
+        _buildActionButton(
+          icon: Icons.open_in_new,
+          label: 'Open',
+          onTap: () => _launchUrl(uri),
+          isPrimary: true,
+        ),
+      );
     } else if (code.toLowerCase().startsWith('mailto:')) {
-      buttons.insert(0, _buildActionButton(
-        icon: Icons.email,
-        label: 'Send Email',
-        onTap: () => _launchUrl(Uri.parse(code)),
-        isPrimary: true,
-      ));
+      buttons.insert(
+        0,
+        _buildActionButton(
+          icon: Icons.email,
+          label: 'Send Email',
+          onTap: () => _launchUrl(Uri.parse(code)),
+          isPrimary: true,
+        ),
+      );
     } else if (code.toLowerCase().startsWith('smsto:')) {
-      buttons.insert(0, _buildActionButton(
-        icon: Icons.message,
-        label: 'Send SMS',
-        onTap: () => _launchUrl(Uri.parse(code.replaceFirst('smsto:', 'sms:'))),
-        isPrimary: true,
-      ));
+      buttons.insert(
+        0,
+        _buildActionButton(
+          icon: Icons.message,
+          label: 'Send SMS',
+          onTap: () =>
+              _launchUrl(Uri.parse(code.replaceFirst('smsto:', 'sms:'))),
+          isPrimary: true,
+        ),
+      );
     }
 
     return Column(
@@ -377,7 +374,12 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
         _buildActionButton(
           icon: Icons.qr_code_scanner,
           label: 'Scan Another',
-          onTap: () => Navigator.of(context).pop(),
+          onTap: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const QRViewExample()),
+            );
+          },
+
           isPrimary: false,
           fullWidth: true,
         ),
@@ -393,7 +395,9 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
     bool fullWidth = false,
   }) {
     return Container(
-      margin: fullWidth ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: 4),
+      margin: fullWidth
+          ? EdgeInsets.zero
+          : const EdgeInsets.symmetric(horizontal: 4),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -403,7 +407,9 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
                 )
               : null,
           color: isPrimary ? null : Colors.white.withOpacity(0.1),
-          border: isPrimary ? null : Border.all(color: Colors.white.withOpacity(0.2)),
+          border: isPrimary
+              ? null
+              : Border.all(color: Colors.white.withOpacity(0.2)),
         ),
         child: Material(
           color: Colors.transparent,
@@ -488,7 +494,9 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
       title: 'SMS Message',
       subtitle: number,
       icon: Icons.sms,
-      details: message.isNotEmpty ? [_buildDetailRow('Message', message)] : null,
+      details: message.isNotEmpty
+          ? [_buildDetailRow('Message', message)]
+          : null,
     );
   }
 
@@ -623,19 +631,28 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
     if (code.toLowerCase().startsWith('mailto:')) return Icons.email;
     if (code.toLowerCase().startsWith('smsto:')) return Icons.sms;
     if (code.toLowerCase().startsWith('wifi:')) return Icons.wifi;
-    if (code.toLowerCase().startsWith('bitcoin:')) return Icons.currency_bitcoin;
+    if (code.toLowerCase().startsWith('bitcoin:'))
+      return Icons.currency_bitcoin;
     if (code.toLowerCase().contains('twitter.com') ||
-        code.toLowerCase().startsWith('twitter:')) return Icons.alternate_email;
+        code.toLowerCase().startsWith('twitter:')) {
+      return Icons.alternate_email;
+    }
     if (code.toLowerCase().contains('facebook.com') ||
-        code.toLowerCase().startsWith('fb:')) return Icons.facebook;
+        code.toLowerCase().startsWith('fb:')) {
+      return Icons.facebook;
+    }
     if (code.toLowerCase().endsWith('.pdf')) return Icons.picture_as_pdf;
     if (code.toLowerCase().endsWith('.mp3')) return Icons.music_note;
     if (code.toLowerCase().contains('play.google.com') ||
-        code.toLowerCase().contains('apps.apple.com')) return Icons.store;
+        code.toLowerCase().contains('apps.apple.com')) {
+      return Icons.store;
+    }
     if (code.toLowerCase().endsWith('.jpg') ||
         code.toLowerCase().endsWith('.jpeg') ||
         code.toLowerCase().endsWith('.png') ||
-        code.toLowerCase().endsWith('.gif')) return Icons.image;
+        code.toLowerCase().endsWith('.gif')) {
+      return Icons.image;
+    }
 
     final Uri? uri = Uri.tryParse(code);
     if (uri != null && uri.hasScheme) return Icons.link;
@@ -657,17 +674,25 @@ class _ResultScreenState extends State<ResultScreen> with TickerProviderStateMix
     if (code.toLowerCase().startsWith('wifi:')) return 'WiFi Network';
     if (code.toLowerCase().startsWith('bitcoin:')) return 'Bitcoin Address';
     if (code.toLowerCase().contains('twitter.com') ||
-        code.toLowerCase().startsWith('twitter:')) return 'Twitter';
+        code.toLowerCase().startsWith('twitter:')) {
+      return 'Twitter';
+    }
     if (code.toLowerCase().contains('facebook.com') ||
-        code.toLowerCase().startsWith('fb:')) return 'Facebook';
+        code.toLowerCase().startsWith('fb:')) {
+      return 'Facebook';
+    }
     if (code.toLowerCase().endsWith('.pdf')) return 'PDF Document';
     if (code.toLowerCase().endsWith('.mp3')) return 'MP3 Audio';
     if (code.toLowerCase().contains('play.google.com') ||
-        code.toLowerCase().contains('apps.apple.com')) return 'App Store';
+        code.toLowerCase().contains('apps.apple.com')) {
+      return 'App Store';
+    }
     if (code.toLowerCase().endsWith('.jpg') ||
         code.toLowerCase().endsWith('.jpeg') ||
         code.toLowerCase().endsWith('.png') ||
-        code.toLowerCase().endsWith('.gif')) return 'Image';
+        code.toLowerCase().endsWith('.gif')) {
+      return 'Image';
+    }
 
     final Uri? uri = Uri.tryParse(code);
     if (uri != null && uri.hasScheme) return 'Web Link';
