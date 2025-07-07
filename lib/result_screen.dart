@@ -631,8 +631,9 @@ class _ResultScreenState extends State<ResultScreen>
     if (code.toLowerCase().startsWith('mailto:')) return Icons.email;
     if (code.toLowerCase().startsWith('smsto:')) return Icons.sms;
     if (code.toLowerCase().startsWith('wifi:')) return Icons.wifi;
-    if (code.toLowerCase().startsWith('bitcoin:'))
+    if (code.toLowerCase().startsWith('bitcoin:')) {
       return Icons.currency_bitcoin;
+    }
     if (code.toLowerCase().contains('twitter.com') ||
         code.toLowerCase().startsWith('twitter:')) {
       return Icons.alternate_email;
